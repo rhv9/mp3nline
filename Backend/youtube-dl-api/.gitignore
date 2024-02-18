@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+
+# MINE MINE MINE MINE MINE MINE MINE MINE 
+
+*.mp3
+
 # User-specific files
 *.rsuser
 *.suo
@@ -361,3 +366,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
