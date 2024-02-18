@@ -29,4 +29,15 @@ app.MapPut(" /burgers", (Burger burger) => BurgerDB.CreateBurger(burger));
 app.MapDelete("/burgers/{id}", (int id) => BurgerDB.RemoveBurger(id));
 app.MapPost("/print", (string text) => Console.WriteLine(text));
 app.MapGet("/yt-get-song", (string url) => YoutubeManager.GetSong(url));
+
+app.MapGet("/video", () => 
+{
+    string filename = "optimumpride.mp3";
+    FileInfo fileInfo = new FileInfo(filename);
+
+    FileStream filestream = System.IO.File.OpenRead(fileInfo.FullName);
+
+    return Results.File(filestream, contentType: "video/mp4", fileDownloadName: "optiprime.mp3", enableRangeProcessing: true);
+});
+
 app.Run();
