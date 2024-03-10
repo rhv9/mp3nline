@@ -4,11 +4,15 @@
     //./yt-dlp.exe --skip-download --print "%(duration>%H:%M:%S.%s)s %(creator)s %(uploader)s - %(title)s" https://www.youtube.com/watch?v=v2H4l9RpkwM
 
     // ./yt-dlp.exe -x --audio-format mp3 -o "%(title)s.%(ext)s" [URL]
+    // ./yt-dlp.exe -x --audio-format mp3 --no-playlist -o "%(title)s.%(ext)s" "
     public class YoutubeManager
     {
 
         public static IResult GetSong(string url)
         {
+            Console.WriteLine("\n\nSTARTING YT\n\n");
+
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine(url);
 
             System.Diagnostics.Process process = new System.Diagnostics.Process();
@@ -18,6 +22,7 @@
             // todo extracting audio when file already exists causes errors
             startInfo.Arguments = "/C yt-dlp.exe -x --audio-format mp3 --no-playlist -o \"%(title)s.%(ext)s\" \"" + url + "\"";
             startInfo.RedirectStandardOutput = true;
+            startInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
             startInfo.RedirectStandardError = true;
             process.StartInfo = startInfo;
             process.Start();
@@ -44,6 +49,10 @@
                     filename = line.Substring(textLen, line.Length - textLen);
                 }
             }
+
+            Console.WriteLine("\n\nDONE\n\n");
+
+            return Results.Ok("Done");
 
             if (filename == "")
             {

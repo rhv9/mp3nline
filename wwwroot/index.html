@@ -3,8 +3,24 @@
 <head>
     <meta charset="utf-8" />
     <title>Hello World</title>
+
+    <style>
+        body {
+            background-color: darkred;
+        }
+
+        h1#heading {
+            color: aliceblue;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello World!</h1>
+    <h1 id="heading">Youtube to mp3 at HOME FOR FREE!</h1>
+
+    <label for="youtube-url-box">Please enter youtube url!</label>
+    <input type="text" id="youtube-url-box" name="youtube-url-box"/>
+    <button id="submit-url" onclick="submitURL()">Download</button>
+    
+<script src="js/index.js"></script>
 </body>
 </html>

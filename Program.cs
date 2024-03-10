@@ -1,4 +1,4 @@
-using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using youtube_dl_api.DB;
 using youtube_dl_api.youtubemanager;
@@ -24,6 +24,7 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Youtube DL API V1");
 });
 
+
 app.MapGet("/burgers/{id}", (int id) => BurgerDB.GetBurger(id));
 app.MapGet("/burgers", () => BurgerDB.GetBurgers());
 app.MapPost("/burgers", (Burger burger) => BurgerDB.CreateBurger(burger));
@@ -31,6 +32,7 @@ app.MapPut(" /burgers", (Burger burger) => BurgerDB.CreateBurger(burger));
 app.MapDelete("/burgers/{id}", (int id) => BurgerDB.RemoveBurger(id));
 app.MapPost("/print", (string text) => Console.WriteLine(text));
 app.MapGet("/yt-get-song", (string url) => YoutubeManager.GetSong(url));
+app.MapGet("/test", () => { Console.WriteLine("カワシマ"); });
 
 
 app.Run();
