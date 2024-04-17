@@ -31,7 +31,9 @@ app.MapPost("/burgers", (Burger burger) => BurgerDB.CreateBurger(burger));
 app.MapPut(" /burgers", (Burger burger) => BurgerDB.CreateBurger(burger));
 app.MapDelete("/burgers/{id}", (int id) => BurgerDB.RemoveBurger(id));
 app.MapPost("/print", (string text) => Console.WriteLine(text));
-app.MapGet("/yt-get-song", (string url) => YoutubeManager.GetSong(url));
+app.MapGet("/yt-request-song", (string url) => YoutubeManager.RequestDownloadSong(url));
+app.MapGet("/yt-ping-song-status", (int id) => YoutubeManager.GetSongStatus(id));
+app.MapGet("/yt-get-finished-song", (int id) => YoutubeManager.GetFinishedSong(id));
 app.MapGet("/test", () => { Console.WriteLine("カワシマ"); });
 
 
