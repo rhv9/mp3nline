@@ -83,7 +83,7 @@ async function PingForSong() {
         else {
             console.log("This should never run. No status for PingForSong");
         }
-
+            
         await new Promise(resolve => setTimeout(resolve, 5000));
     }
 }
@@ -97,7 +97,8 @@ async function DownloadSong() {
     const header = result.headers.get('Content-Disposition');
     const parts = header.split(';');
 
-    const filename = decodeURIComponent(parts[2].split('=')[1]);
+    const filename = decodeURIComponent(parts[2].split('=')[1]).slice(6);
+
     console.log("Filename: " + filename);
 
     let blob = await result.blob();

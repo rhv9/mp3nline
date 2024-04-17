@@ -62,7 +62,6 @@ namespace youtube_dl_api.youtubemanager
                 FailedList.Add(newId);
                 return;
             }
-            string output = process.StandardOutput.ReadToEnd();
             string filename = "";
 
             Console.WriteLine($"[Finish]: Download of song of ID: {newId}");
