@@ -30,7 +30,7 @@ namespace youtube_dl_api.youtubemanager
             FinishedList.Remove(newId);
             FileInfo fileInfo = new FileInfo(filename);
             FileStream filestream = System.IO.File.OpenRead(fileInfo.FullName);
-            return Results.File(filestream, contentType: "video/mp3", fileDownloadName: filename.Substring(3), enableRangeProcessing: true);
+            return Results.File(filestream, contentType: "video/mp3", fileDownloadName: filename.Substring(3+20), enableRangeProcessing: true);
 
         }
         public static void DownloadSong(string url, int newId)
@@ -42,8 +42,10 @@ namespace youtube_dl_api.youtubemanager
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             //startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
             // todo extracting audio when file already exists causes errors
+            DateTime time = DateTime.Now;
+            string timeString = time.ToString("dd-MM-yyyy_HH_mm_ss_");
             process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = "/C cd yt && yt-dlp.exe -x --audio-format mp3 --no-playlist -o \"%(title)s.%(ext)s\" \"" + url + "\"";
+            process.StartInfo.Arguments = $"/C cd yt && yt-dlp.exe -x --audio-format mp3 --no-playlist -o \"{timeString}%(title)s.%(ext)s\" \"" + url + "\"";
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardInput = true;
             process.StartInfo.RedirectStandardError = true;
@@ -69,19 +71,19 @@ namespace youtube_dl_api.youtubemanager
             // Get song file name
             string[] files = System.IO.Directory.GetFiles("yt/");
 
-            if (files.Length != 2)
-            {
-                // There should always be two files, why is there two?
-                FailedList.Add(newId);
-                return;
-            }
-                
             foreach (string file in files)
             {
-                if (file == "yt/yt-dlp.exe")
-                    continue;
+                if (file.Contains(timeString))
+                {
+                    filename = file;
+                }
+            }
 
-                filename = file;
+            if (filename == "")
+            {
+                Console.WriteLine("Failed to find file!");
+                FailedList.Add(newId);
+                return;
             }
             Console.WriteLine($"Filename: {filename}");
 
