@@ -45,7 +45,7 @@ namespace youtube_dl_api.youtubemanager
             DateTime time = DateTime.Now;
             string timeString = time.ToString("dd-MM-yyyy_HH_mm_ss_");
             process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = $"/C cd yt && yt-dlp.exe -x --audio-format mp3 --no-playlist -o \"{timeString}%(title)s.%(ext)s\" \"" + url + "\"";
+            process.StartInfo.Arguments = $"/C cd yt && yt-dlp.exe -x --audio-format mp3 --no-playlist --embed-metadata -o \"{timeString}%(title)s.%(ext)s\" \"" + url + "\"";
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardInput = true;
             process.StartInfo.RedirectStandardError = true;

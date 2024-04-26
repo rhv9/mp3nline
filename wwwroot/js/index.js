@@ -1,41 +1,9 @@
 setTimeout(() => {
     const element = document.getElementById("heading");
-    element.innerHTML += " hacked!";
+    //element.innerHTML += " hacked!";
 }, 5000);
 
 let songRequestID = -1;
-
-function submitURL1() {
-    const text = document.getElementById("youtube-url-box").value;
-
-    //console.log("Fetching burgers...");
-    //let data = fetchBurgers().then(data => {
-    //    console.log(data[0]);
-    //});
-    let filename = '';
-
-    console.log('fetching...')
-
-    let url = "/yt-get-song?url=" + text;
-    fetch(url)
-        .then(res => {
-            console.log('DOES THIS EVEN WORK?')
-            const header = res.headers.get('Content-Disposition');
-            const parts = header.split(';');
-            filename = parts[1].split('=')[1];
-            console.log("Filename: " + filename);
-            return res.blob();
-        })
-        .then(blob => {
-            let file = window.URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            
-        });
-}
-
 
 async function submitURL(e) {
     e.preventDefault();
@@ -84,7 +52,7 @@ async function PingForSong() {
             console.log("This should never run. No status for PingForSong");
         }
             
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 500));
     }
 }
 
@@ -97,7 +65,7 @@ async function DownloadSong() {
     const header = result.headers.get('Content-Disposition');
     const parts = header.split(';');
 
-    const filename = decodeURIComponent(parts[2].split('=')[1]).slice(6);
+    const filename = decodeURIComponent(parts[2].split('=')[1]).slice(7);
 
     console.log("Filename: " + filename);
 
@@ -127,7 +95,11 @@ async function fetchBurgers() {
 let button = document.getElementById('submit-url');
 button.addEventListener('click', submitURL);
 
+let clearButton = document.getElementById('clear-button');
+clearButton.addEventListener('click', (ev) => {
+    document.getElementById('youtube-url-box').value = "";
+});
 
 let urlBox = document.getElementById('youtube-url-box');
-urlBox.value = "https://www.youtube.com/watch?v=utB8vYW06rI&list=PLeEG5MBW9D2TMK5jTZifHm5QXCpLDyA96&index=5";
+
 

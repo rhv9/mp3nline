@@ -3,25 +3,21 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Hello World</title>
-
-    <style>
-        body {
-            background-color: darkred;
-        }
-
-        h1#heading {
-            color: aliceblue;
-        }
-    </style>
+    <title>Music for Home</title>
+    <link href='https://fonts.googleapis.com/css?family=Open Sans' rel='stylesheet' type="text/css">
+    <link rel="stylesheet" href="css/maincss.css?ver=1.1" />
 </head>
 <body>
-    <h1 id="heading">Youtube to mp3 at HOME FOR FREE!</h1>
+    <h1 id="heading">Youtube to mp3</h1>
 
-    <label for="youtube-url-box">Please enter youtube url!</label>
-    <input type="text" id="youtube-url-box" name="youtube-url-box" />
-    <button type="button" id="submit-url">Download</button>
-    <br />
-<script src="js/index.js"></script>
+    <div class="container">
+        <label class="yt-label" for="youtube-url-box">Please enter youtube url!</label>
+        <input type="text" id="youtube-url-box" name="youtube-url-box" placeholder="Enter URL"/>
+        <div class="button-container">
+            <button type="button" id="submit-url">Download</button>
+            <button type="button" id="clear-button">Clear</button>
+        </div>
+    </div>
+    <script src="js/index.js?ver=1.1"></script>
 </body>
 </html>
