@@ -31,3 +31,17 @@
 .button-container {
     flex-direction: row;
 }
+
+.pb-grey {
+    background-color: lightgrey;
+    border-radius: 30px;
+    overflow: hidden;
+    margin: 10px 20%;
+}
+
+.pb-bar {
+    background-color: #00cc00;
+    height: 12px;
+    width: 20%;
+    transform: translateX(-100%);
+}

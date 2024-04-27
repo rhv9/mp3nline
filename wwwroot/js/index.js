@@ -92,8 +92,8 @@ async function fetchBurgers() {
 }
 
 
-let button = document.getElementById('submit-url');
-button.addEventListener('click', submitURL);
+let downloadButton = document.getElementById('submit-url');
+downloadButton.addEventListener('click', submitURL);
 
 let clearButton = document.getElementById('clear-button');
 clearButton.addEventListener('click', (ev) => {
@@ -103,3 +103,43 @@ clearButton.addEventListener('click', (ev) => {
 let urlBox = document.getElementById('youtube-url-box');
 
 
+// --- Progress Bar ----
+
+
+class ProgressBar {
+    static pb = document.getElementsByClassName('pb-bar')[0];
+    static enabledID = null;
+
+    static enableClassic() {
+        let pbXTransform = 0;
+        ProgressBar.enabledID = setInterval(() => {
+            ProgressBar.pb.style.transform = `translate(${pbXTransform}%)`
+            pbXTransform += 2;
+
+            if (pbXTransform > 500)
+                pbXTransform = -100;
+        }, 16.7);
+    }
+    static enableLeftRight() {
+        ProgressBar.pb.style.transition = "1s ease-in-out";
+        let pbXTransform = true;
+        ProgressBar.enabledID = setInterval(() => {
+            if (pbXTransform) 
+                ProgressBar.pb.style.transform = `translate(${500}%)`
+            else 
+                ProgressBar.pb.style.transform = `translate(${-100}%)`
+            pbXTransform = !pbXTransform;
+        }, 1000);
+    }
+
+    static disable() {
+        if (ProgressBar.enabledID) 
+            clearInterval(ProgressBar.enabledID);
+
+        ProgressBar.pb.style.transform = `translate(${-100}%)`;
+    }
+
+
+}
+
+ProgressBar.enableLeftRight();
