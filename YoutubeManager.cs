@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Diagnostics;
+using System.Xml;
+
+using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
+using Google.Apis.YouTube.v3.Data;
+using System.Text.RegularExpressions;
 
 namespace youtube_dl_api.youtubemanager
 {
@@ -14,6 +20,25 @@ namespace youtube_dl_api.youtubemanager
 
     public class YoutubeManager
     {
+        public readonly struct YTVideoData
+        {
+            public string Id { get; }
+            public string Title { get; }
+            public TimeSpan Duration { get; }
+
+            public ThumbnailDetails Thumbnails { get; }
+
+            public YTVideoData(string id, string title, TimeSpan duration, ThumbnailDetails thumbnails)
+            { 
+                Id = id; 
+                Title = title; 
+                Duration = duration; 
+                Thumbnails = thumbnails; 
+            }
+
+        }
+        public static string? YTAPI_KEY;
+
         public static int IdPos = 0;
         public static List<int> ProcessingList = new List<int>();
         public static Dictionary<int, string> FinishedList = new Dictionary<int, string>();
@@ -33,6 +58,36 @@ namespace youtube_dl_api.youtubemanager
             return Results.File(filestream, contentType: "video/mp3", fileDownloadName: filename.Substring(3+20), enableRangeProcessing: true);
 
         }
+        public static YTVideoData? GetVideoData(string url)
+        {
+            if (YTAPI_KEY == null)
+                return null;
+
+            Regex rx = new Regex(@"((?<=(v|V)/)|(?<=be/)|(?<=(\?|\&)v=)|(?<=embed/))([\w-]+)");
+            Match match = rx.Match(url);
+            if (!match.Success)
+                return null;
+
+            string videoId = match.Value;
+
+            YouTubeService youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            {
+                ApiKey = YTAPI_KEY,
+                ApplicationName = "YTM"
+            });
+
+            var request = youtubeService.Videos.List("snippet,contentDetails");
+            request.Id = videoId;
+            VideoListResponse response = request.Execute();
+
+            string title = response.Items[0].Snippet.Title;
+            ThumbnailDetails thumbnails = response.Items[0].Snippet.Thumbnails;
+            string duration = response.Items[0].ContentDetails.Duration;
+            TimeSpan ts = System.Xml.XmlConvert.ToTimeSpan(duration);
+
+            return new YTVideoData(videoId, title, ts, thumbnails);
+        }
+
         public static void DownloadSong(string url, int newId)
         {
             
@@ -62,6 +117,7 @@ namespace youtube_dl_api.youtubemanager
                 Console.Error.WriteLine(process.StandardOutput.ReadToEnd());
 
                 FailedList.Add(newId);
+                ProcessingList.Remove(newId);
                 return;
             }
             string filename = "";
@@ -111,6 +167,12 @@ namespace youtube_dl_api.youtubemanager
             ProcessingList.Add(newId);
 
             Task.Run(() => { DownloadSong(url, newId); });
+
+            YTVideoData? videoData = GetVideoData(url);
+            if (videoData != null)
+            {
+                return Results.Ok(new {SongRequestID = newId, VideoData = videoData});
+            }
 
             return Results.Ok(new {SongRequestID = newId});
         }

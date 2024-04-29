@@ -5,6 +5,32 @@ setTimeout(() => {
 
 let songRequestID = -1;
 
+
+class VideoResults {
+
+    static SetTitle(title) {
+        document.getElementsByClassName("span-title")[0].textContent = title;
+    }
+
+    /**
+     * @param {string} duration
+     */
+    static SetDuration(duration) {
+        var durString = duration.length > 5 ? duration : duration.substring(2);
+        document.getElementById('span-duration').textContent = durString;
+    }
+
+    static SetImg(url) {
+        document.getElementById('img-video').src = url;
+    }
+
+    static SetFromVideoData(videoData) {
+        VideoResults.SetTitle(videoData.title);
+        VideoResults.SetDuration(videoData.duration);
+        VideoResults.SetImg(videoData.thumbnails.maxres.url);
+    }
+}
+
 async function submitURL(e) {
     e.preventDefault();
     let p = document.createElement('p')
@@ -20,8 +46,11 @@ async function submitURL(e) {
     let result = await fetch(url)
 
     let data = await result.json();
-    songRequestID = data.songRequestID;
 
+    songRequestID = data.songRequestID;
+    console.log(data.videoData);
+    VideoResults.SetFromVideoData(data.videoData);
+    
     PingForSong();
 }
 
@@ -84,14 +113,6 @@ async function DownloadSong() {
 
 
 
-async function fetchBurgers() {
-    let response = await fetch("/burgers");
-    let data = await response.json();
-    
-    return data;
-}
-
-
 let downloadButton = document.getElementById('submit-url');
 downloadButton.addEventListener('click', submitURL);
 
@@ -99,8 +120,6 @@ let clearButton = document.getElementById('clear-button');
 clearButton.addEventListener('click', (ev) => {
     document.getElementById('youtube-url-box').value = "";
 });
-
-let urlBox = document.getElementById('youtube-url-box');
 
 
 // --- Progress Bar ----

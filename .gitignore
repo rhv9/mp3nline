@@ -8,6 +8,7 @@
 
 *.mp3
 yt-dlp.exe
+ytapikey
 
 # User-specific files
 *.rsuser
