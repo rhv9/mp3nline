@@ -46,9 +46,9 @@ class Program
         app.MapGet("/yt-ping-song-status", (int id) => YoutubeManager.GetSongStatus(id));
         app.MapGet("/yt-get-finished-song", (int id) => YoutubeManager.GetFinishedSong(id));
         app.MapGet("/test", () => { Console.WriteLine("カワシマ"); });
-
-
-        app.Run();
-
+        
+        var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+        var url = $"http://0.0.0.0:{port}";
+        app.Run(url);
     }
 } 

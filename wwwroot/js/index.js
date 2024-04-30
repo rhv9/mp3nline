@@ -1,10 +1,72 @@
-setTimeout(() => {
-    const element = document.getElementById("heading");
-    //element.innerHTML += " hacked!";
-}, 5000);
-
 let songRequestID = -1;
 
+var containerResult = document.getElementsByClassName("container-results")[0]
+var containerResultData = containerResult.getElementsByClassName("container-results-data")[0];
+var mainProgressBar;
+
+
+
+// --- Progress Bar ----
+
+class ProgressBar {
+    constructor() {
+        this.parentElem = document.createElement("div");
+        this.parentElem.className = "pb-grey";
+        this.pbbar = document.createElement("div");
+        this.pbbar.className = "pb-bar";
+        this.parentElem.appendChild(this.pbbar);
+        this.enabledID = -1;
+    }
+
+
+    enableClassic() {
+        if (this.enabledID != -1)
+            return;
+
+        let pbXTransform = 0;
+        this.enabledID = setInterval(() => {
+            this.pbbar.style.transform = `translate(${pbXTransform}%)`
+            pbXTransform += 2;
+
+            if (pbXTransform > 500)
+                pbXTransform = -100;
+        }, 16.7);
+    }
+    enableLeftRight() {
+        if (this.enabledID != -1)
+            return;
+
+        this.pbbar.style.transition = "1s ease-in-out";
+        let pbXTransform = true;
+        this.enabledID = setInterval(() => {
+            if (pbXTransform)
+                this.pbbar.style.transform = `translate(${500}%)`
+            else
+                this.pbbar.style.transform = `translate(${-100}%)`
+            pbXTransform = !pbXTransform;
+        }, 1000);
+    }
+
+    disableAnimation() {
+        if (this.enabledID)
+            clearInterval(this.enabledID);
+
+        this.pbbar.style.transition = "";
+        this.pbbar.style.transform = `translate(${-100}%)`;
+
+        this.enabledID = -1;
+    }
+
+    remove() {
+        this.parentElem.remove();
+    }
+
+    setShow(show) {
+        this.parentElem.style.display = show ? "block" : "none";
+    }
+
+
+}
 
 class VideoResults {
 
@@ -16,7 +78,7 @@ class VideoResults {
      * @param {string} duration
      */
     static SetDuration(duration) {
-        var durString = duration.length > 5 ? duration : duration.substring(2);
+        var durString = duration.substring(0, 1) == "00" ? duration + " hours" : duration.substring(3) + " minutes";
         document.getElementById('span-duration').textContent = durString;
     }
 
@@ -31,11 +93,28 @@ class VideoResults {
     }
 }
 
+/**
+ * @param {boolean} state
+ */
+function resultContainerActive(active) {
+    document.getElementsByClassName("container-results")[0]
+        .style.display = active ? "block" : "none";
+
+}
+
+function resultContainerDataActive(active) {
+    document.getElementsByClassName("container-results-data")[0]
+        .style.display = active ? "block" : "none";
+
+}
+
 async function submitURL(e) {
     e.preventDefault();
-    let p = document.createElement('p')
-    p.innerText = "Clicked"
-    document.body.appendChild(p);
+
+    // make result container visible
+    resultContainerActive(true);
+    mainProgressBar.setShow(true);
+    mainProgressBar.enableLeftRight();
 
     const text = document.getElementById("youtube-url-box").value;
     console.log("Requesting song with url: " + text);
@@ -50,7 +129,11 @@ async function submitURL(e) {
     songRequestID = data.songRequestID;
     console.log(data.videoData);
     VideoResults.SetFromVideoData(data.videoData);
-    
+
+    resultContainerDataActive(true);
+    mainProgressBar.setShow(false);
+    document.getElementById("btn-download").disabled = true;
+    document.getElementById("btn-download").innerText = "Processing...";
     PingForSong();
 }
 
@@ -85,6 +168,8 @@ async function PingForSong() {
     }
 }
 
+let a;
+
 async function DownloadSong() {
     console.log("Downloading Song ID: " + songRequestID);
 
@@ -103,14 +188,25 @@ async function DownloadSong() {
     console.log('Got blob')
 
     let blob_url = window.URL.createObjectURL(blob);
-    let a = document.createElement('a');
+    a = document.createElement('a');
     a.href = blob_url;
+    a.style.display = "none";
     a.download = filename;
     a.innerText = filename;
 
-    document.body.appendChild(a);
+
+    document.getElementById("btn-download").disabled = false;
+    document.getElementById("btn-download").innerText = "Download :D";
 }
 
+function OnClickBtnDownload(ev) {
+    console.log("CLICKED!!");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+document.getElementById('btn-download').addEventListener('click', OnClickBtnDownload);
 
 
 let downloadButton = document.getElementById('submit-url');
@@ -122,43 +218,6 @@ clearButton.addEventListener('click', (ev) => {
 });
 
 
-// --- Progress Bar ----
 
-
-class ProgressBar {
-    static pb = document.getElementsByClassName('pb-bar')[0];
-    static enabledID = null;
-
-    static enableClassic() {
-        let pbXTransform = 0;
-        ProgressBar.enabledID = setInterval(() => {
-            ProgressBar.pb.style.transform = `translate(${pbXTransform}%)`
-            pbXTransform += 2;
-
-            if (pbXTransform > 500)
-                pbXTransform = -100;
-        }, 16.7);
-    }
-    static enableLeftRight() {
-        ProgressBar.pb.style.transition = "1s ease-in-out";
-        let pbXTransform = true;
-        ProgressBar.enabledID = setInterval(() => {
-            if (pbXTransform) 
-                ProgressBar.pb.style.transform = `translate(${500}%)`
-            else 
-                ProgressBar.pb.style.transform = `translate(${-100}%)`
-            pbXTransform = !pbXTransform;
-        }, 1000);
-    }
-
-    static disable() {
-        if (ProgressBar.enabledID) 
-            clearInterval(ProgressBar.enabledID);
-
-        ProgressBar.pb.style.transform = `translate(${-100}%)`;
-    }
-
-
-}
-
-ProgressBar.enableLeftRight();
+mainProgressBar = new ProgressBar();
+containerResult.insertBefore(mainProgressBar.parentElem, containerResultData);

@@ -43,6 +43,11 @@ body {
     border-radius: 10px;
     padding: 10px;
     color: white;
+    display: none;
+}
+
+.container-results-data {
+    display:none;
 }
 
 
@@ -67,9 +72,11 @@ body {
 
 
 /* Image */
-.container-results > img {
+#img-video {
     border: 1px dashed white;
     padding: 5px;
     width: 100%; 
     height: auto;
 }
+
+
