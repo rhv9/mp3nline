@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Diagnostics;
 using System.Xml;
-using System.Web.Hosting;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Net.Http;
 
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
@@ -12,7 +13,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Hosting.Internal;
 
-namespace youtube_dl_api.youtubemanager
+namespace youtube_dl_api
 {
 
     //./yt-dlp.exe --skip-download --print "%(duration>%H:%M:%S.%s)s %(creator)s %(uploader)s - %(title)s" https://www.youtube.com/watch?v=v2H4l9RpkwM
@@ -32,14 +33,16 @@ namespace youtube_dl_api.youtubemanager
             public ThumbnailDetails Thumbnails { get; }
 
             public YTVideoData(string id, string title, TimeSpan duration, ThumbnailDetails thumbnails)
-            { 
-                Id = id; 
-                Title = title; 
-                Duration = duration; 
-                Thumbnails = thumbnails; 
+            {
+                Id = id;
+                Title = title;
+                Duration = duration;
+                Thumbnails = thumbnails;
             }
 
         }
+        private static readonly HttpClient client = new HttpClient();
+
         public static string? YTAPI_KEY;
 
         private static string ytDlpFile = "notset";
@@ -69,12 +72,12 @@ namespace youtube_dl_api.youtubemanager
         {
             if (!FinishedList.ContainsKey(newId))
                 return Results.NotFound("Finished Song ID not found!");
-            
+
             string filename = FinishedList[newId];
             FinishedList.Remove(newId);
             FileInfo fileInfo = new FileInfo(filename);
-            FileStream filestream = System.IO.File.OpenRead(fileInfo.FullName);
-            return Results.File(filestream, contentType: "video/mp3", fileDownloadName: filename.Substring(3+20), enableRangeProcessing: true);
+            FileStream filestream = File.OpenRead(fileInfo.FullName);
+            return Results.File(filestream, contentType: "video/mp3", fileDownloadName: filename.Substring(3 + 20), enableRangeProcessing: true);
 
         }
         public static YTVideoData? GetVideoData(string url)
@@ -102,7 +105,7 @@ namespace youtube_dl_api.youtubemanager
             string title = response.Items[0].Snippet.Title;
             ThumbnailDetails thumbnails = response.Items[0].Snippet.Thumbnails;
             string duration = response.Items[0].ContentDetails.Duration;
-            TimeSpan ts = System.Xml.XmlConvert.ToTimeSpan(duration);
+            TimeSpan ts = XmlConvert.ToTimeSpan(duration);
 
             Console.WriteLine("Title: " + title);
 
@@ -111,34 +114,33 @@ namespace youtube_dl_api.youtubemanager
 
         public static void DownloadSong(string url, int newId)
         {
-            
+            Console.WriteLine("IS THIS FUKCING RUNNING???");
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
+            Process process = new Process();
             //startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
             // todo extracting audio when file already exists causes errors
-            
+
 
 
             DateTime time = DateTime.Now;
             string timeString = time.ToString("dd-MM-yyyy_HH_mm_ss_");
-            process.StartInfo.FileName = platform == OSPlatform.Windows ?  "cmd.exe" : "/bin/bash";
-            if (platform.Equals(OSPlatform.Windows)) 
+            process.StartInfo.FileName = platform == OSPlatform.Windows ? "cmd.exe" : "/bin/bash";
+            if (platform.Equals(OSPlatform.Windows))
                 process.StartInfo.Arguments = $"/C cd yt && yt-dlp.exe -x --audio-format mp3 --no-playlist --embed-metadata -o \"{timeString}%(title)s.%(ext)s\" \"" + url + "\"";
             else if (platform.Equals(OSPlatform.Linux))
                 process.StartInfo.Arguments = $"-c \"mkdir -p yt; cd yt; ./yt-dlp_linux  -x --audio-format mp3 --no-playlist --embed-metadata -o '{timeString}%(title)s.%(ext)s' '" + url + "'\"";
-            //process.StartInfo.RedirectStandardOutput = true;
-            //process.StartInfo.RedirectStandardInput = true;
-            //process.StartInfo.RedirectStandardError = true;
-            
-            //process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
-            //process.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardInput = true;
+            process.StartInfo.RedirectStandardError = true;
+
+            process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
+            process.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             process.Start();
-            //process.BeginOutputReadLine();
+            process.BeginOutputReadLine();
             process.WaitForExit();
 
-            Console.WriteLine("Output: " + process.StandardOutput.ReadToEnd());
             if (process.ExitCode != 0)
             {
                 // Failed to get song do something
@@ -154,7 +156,7 @@ namespace youtube_dl_api.youtubemanager
             Console.WriteLine($"[Finish]: Download of song of ID: {newId}");
 
             // Get song file name
-            string[] files = System.IO.Directory.GetFiles("yt/");
+            string[] files = Directory.GetFiles("yt/");
 
             foreach (string file in files)
             {
@@ -180,13 +182,13 @@ namespace youtube_dl_api.youtubemanager
             DataReceivedEventArgs outLine)
         {
             // Collect the sort command output. 
-            if (!String.IsNullOrEmpty(outLine.Data))
+            if (!string.IsNullOrEmpty(outLine.Data))
             {
                 Console.WriteLine($"Process Output: {outLine.Data}");
             }
         }
 
-        public static IResult RequestDownloadSong(string url)
+        public static async Task<IResult> RequestDownloadSongAsync(string url)
         {
             Console.WriteLine($"Requesting Download Song URL: {url}");
 
@@ -195,18 +197,22 @@ namespace youtube_dl_api.youtubemanager
 
             ProcessingList.Add(newId);
 
-            HostingEnvironment.
-            Task.Run(() => { DownloadSong(url, newId); });
+            Dictionary<string, string> values = new Dictionary<string, string>
+            {
+                { "url" , url },
+                { "newId", newId + "" }
+            };
+            string toSend = QueryHelpers.AddQueryString("http://localhost:8080/private-download-song", values);
+            Console.WriteLine($"Sending to: {toSend}");
+            client.GetAsync(toSend);
 
             YTVideoData? videoData = GetVideoData(url);
-            Console.WriteLine("VideoData " + videoData.);
             if (videoData != null)
             {
-                Console.WriteLine("Dies ru??");
-                return Results.Ok(new {SongRequestID = newId, VideoData = videoData});
+                return Results.Ok(new { SongRequestID = newId, VideoData = videoData });
             }
 
-            return Results.Ok(new {SongRequestID = newId});
+            return Results.Ok(new { SongRequestID = newId });
         }
 
         public static IResult GetSongStatus(int id)

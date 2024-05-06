@@ -2,9 +2,7 @@
 using Microsoft.OpenApi.Models;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-using youtube_dl_api.DB;
-using youtube_dl_api.youtubemanager;
-
+using youtube_dl_api;
 
 class Program
 {
@@ -63,10 +61,11 @@ class Program
         app.MapPut(" /burgers", (Burger burger) => BurgerDB.CreateBurger(burger));
         app.MapDelete("/burgers/{id}", (int id) => BurgerDB.RemoveBurger(id));
         app.MapPost("/print", (string text) => Console.WriteLine(text));
-        app.MapGet("/yt-request-song", (string url) => YoutubeManager.RequestDownloadSong(url));
+        app.MapGet("/yt-request-song", async (string url) => { return await YoutubeManager.RequestDownloadSongAsync(url); });
         app.MapGet("/yt-ping-song-status", (int id) => YoutubeManager.GetSongStatus(id));
         app.MapGet("/yt-get-finished-song", (int id) => YoutubeManager.GetFinishedSong(id));
         app.MapGet("/test", () => { Console.WriteLine("カワシマ"); });
+        app.MapGet("/private-download-song", (string url, int newId) => { YoutubeManager.DownloadSong(url, newId); });
         
         var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
         var url = $"http://0.0.0.0:{port}";
