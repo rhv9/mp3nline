@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Diagnostics;
 using System.Xml;
+using System.Web.Hosting;
 
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
+using Microsoft.Extensions.Hosting.Internal;
 
 namespace youtube_dl_api.youtubemanager
 {
@@ -39,12 +42,28 @@ namespace youtube_dl_api.youtubemanager
         }
         public static string? YTAPI_KEY;
 
+        private static string ytDlpFile = "notset";
+        private static OSPlatform platform;
+
         public static int IdPos = 0;
         public static List<int> ProcessingList = new List<int>();
         public static Dictionary<int, string> FinishedList = new Dictionary<int, string>();
         public static List<int> FailedList = new List<int>();
 
         public static int GenId() { return IdPos++; }
+
+        public static void SetOs(OSPlatform platform)
+        {
+            YoutubeManager.platform = platform;
+            if (platform.Equals(OSPlatform.Windows))
+            {
+                ytDlpFile = "";
+            }
+            else if (platform.Equals(OSPlatform.Linux))
+            {
+                ytDlpFile = "./yt-dlp_linux ";
+            }
+        }
 
         public static IResult GetFinishedSong(int newId)
         {
@@ -85,6 +104,8 @@ namespace youtube_dl_api.youtubemanager
             string duration = response.Items[0].ContentDetails.Duration;
             TimeSpan ts = System.Xml.XmlConvert.ToTimeSpan(duration);
 
+            Console.WriteLine("Title: " + title);
+
             return new YTVideoData(videoId, title, ts, thumbnails);
         }
 
@@ -97,19 +118,27 @@ namespace youtube_dl_api.youtubemanager
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             //startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
             // todo extracting audio when file already exists causes errors
+            
+
+
             DateTime time = DateTime.Now;
             string timeString = time.ToString("dd-MM-yyyy_HH_mm_ss_");
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = $"/C cd yt && yt-dlp.exe -x --audio-format mp3 --no-playlist --embed-metadata -o \"{timeString}%(title)s.%(ext)s\" \"" + url + "\"";
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardInput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
-            process.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
+            process.StartInfo.FileName = platform == OSPlatform.Windows ?  "cmd.exe" : "/bin/bash";
+            if (platform.Equals(OSPlatform.Windows)) 
+                process.StartInfo.Arguments = $"/C cd yt && yt-dlp.exe -x --audio-format mp3 --no-playlist --embed-metadata -o \"{timeString}%(title)s.%(ext)s\" \"" + url + "\"";
+            else if (platform.Equals(OSPlatform.Linux))
+                process.StartInfo.Arguments = $"-c \"mkdir -p yt; cd yt; ./yt-dlp_linux  -x --audio-format mp3 --no-playlist --embed-metadata -o '{timeString}%(title)s.%(ext)s' '" + url + "'\"";
+            //process.StartInfo.RedirectStandardOutput = true;
+            //process.StartInfo.RedirectStandardInput = true;
+            //process.StartInfo.RedirectStandardError = true;
+            
+            //process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
+            //process.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             process.Start();
-            process.BeginOutputReadLine();
+            //process.BeginOutputReadLine();
             process.WaitForExit();
 
+            Console.WriteLine("Output: " + process.StandardOutput.ReadToEnd());
             if (process.ExitCode != 0)
             {
                 // Failed to get song do something
@@ -166,11 +195,14 @@ namespace youtube_dl_api.youtubemanager
 
             ProcessingList.Add(newId);
 
+            HostingEnvironment.
             Task.Run(() => { DownloadSong(url, newId); });
 
             YTVideoData? videoData = GetVideoData(url);
+            Console.WriteLine("VideoData " + videoData.);
             if (videoData != null)
             {
+                Console.WriteLine("Dies ru??");
                 return Results.Ok(new {SongRequestID = newId, VideoData = videoData});
             }
 

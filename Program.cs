@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using youtube_dl_api.DB;
 using youtube_dl_api.youtubemanager;
@@ -11,8 +12,28 @@ class Program
     {
 
         // Set YT API Key
-        YoutubeManager.YTAPI_KEY = File.ReadAllText(@"./ytapikey");
-        Console.WriteLine($"YT_API_KEY: {YoutubeManager.YTAPI_KEY}");
+        //YoutubeManager.YTAPI_KEY = Environment.GetEnvironmentVariable("YTAPIKEY") ?? null;
+        YoutubeManager.YTAPI_KEY = "AIzaSyDzip7YrlHEnCgYznnn0KzdYyoJ6-ShkkU";
+        Console.WriteLine($"YT_API_KEY: { (YoutubeManager.YTAPI_KEY != "" ? "Yes" : "No") }");
+
+        bool windows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        bool linux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+        if (windows)
+        {
+            YoutubeManager.SetOs(OSPlatform.Windows);
+            Console.WriteLine("Platform: Windows");
+        }
+        else if (linux)
+        {
+            YoutubeManager.SetOs(OSPlatform.Linux);
+            Console.WriteLine("Platform: Linux");
+        }
+        else
+        {
+            Console.Error.WriteLine("OS is not windows or linux. Exiting");
+            return;
+        }
 
         var builder = WebApplication.CreateBuilder(args);
 

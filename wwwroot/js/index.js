@@ -89,7 +89,15 @@ class VideoResults {
     static SetFromVideoData(videoData) {
         VideoResults.SetTitle(videoData.title);
         VideoResults.SetDuration(videoData.duration);
-        VideoResults.SetImg(videoData.thumbnails.maxres.url);
+        
+        if (videoData.thumbnails.maxres != null)
+            VideoResults.SetImg(videoData.thumbnails.maxres.url);
+        else if (videoData.thumbnails.high != null)
+            VideoResults.SetImg(videoData.thumbnails.high.url);
+        else if (videoData.thumbnails.medium != null)
+            VideoResults.SetImg(videoData.thumbnails.medium.url);
+        else if (videoData.thumbnails.standard != null)
+            VideoResults.SetImg(videoData.thumbnails.standard.url);
     }
 }
 

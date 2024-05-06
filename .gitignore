@@ -7,8 +7,10 @@
 # MINE MINE MINE MINE MINE MINE MINE MINE 
 
 *.mp3
-yt-dlp.exe
 ytapikey
+published
+.mono
+**yt-dlp_linux
 
 # User-specific files
 *.rsuser
