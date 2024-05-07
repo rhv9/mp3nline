@@ -142,7 +142,7 @@ namespace youtube_dl_api
             process.WaitForExit();
 
             if (process.ExitCode != 0)
-            {
+            { 
                 // Failed to get song do something
                 Console.WriteLine($"Process ended with exit code: {process.ExitCode}");
                 Console.Error.WriteLine("Process Output: " + process.StandardOutput.ReadToEnd());

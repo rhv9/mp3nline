@@ -11,3 +11,5 @@ Dockerfile*
 **/*.md
 
 ytapikey
+**/*.mp3
+build.sh

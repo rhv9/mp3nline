@@ -1,0 +1,11 @@
+TODOs
+- Select bitrate of audio on website
+- Download playlist
+- Adds thumbnail to mp3 (shows up in music apps)
+- reduce docker image size to under 500 mb
+- MY YT API KEY IS ON GITHUB!!
+
+UI
+- Add copyright and stuff below
+- Fix desktop sizing since mobile is fine.
+- Add other pages with menu bar at the top.

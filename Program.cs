@@ -10,7 +10,7 @@ class Program
     {
 
         // Set YT API Key
-        //YoutubeManager.YTAPI_KEY = Environment.GetEnvironmentVariable("YTAPIKEY") ?? null;
+        YoutubeManager.YTAPI_KEY = Environment.GetEnvironmentVariable("YTAPIKEY") ?? null;
         YoutubeManager.YTAPI_KEY = "AIzaSyDzip7YrlHEnCgYznnn0KzdYyoJ6-ShkkU";
         Console.WriteLine($"YT_API_KEY: { (YoutubeManager.YTAPI_KEY != "" ? "Yes" : "No") }");
 
