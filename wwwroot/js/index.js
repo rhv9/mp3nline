@@ -116,6 +116,8 @@ function resultContainerDataActive(active) {
 
 }
 
+let SongTitle = "notset";
+
 async function submitURL(e) {
     e.preventDefault();
 
@@ -136,6 +138,7 @@ async function submitURL(e) {
 
     songRequestID = data.songRequestID;
     console.log(data.videoData);
+    SongTitle = data.videoData.title;
     VideoResults.SetFromVideoData(data.videoData);
 
     resultContainerDataActive(true);
@@ -199,8 +202,8 @@ async function DownloadSong() {
     a = document.createElement('a');
     a.href = blob_url;
     a.style.display = "none";
-    a.download = filename;
-    a.innerText = filename;
+    a.download = SongTitle + ".mp3";
+    a.innerText = SongTitle + ".mp3";
 
 
     document.getElementById("btn-download").disabled = false;

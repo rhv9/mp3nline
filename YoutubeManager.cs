@@ -131,21 +131,21 @@ namespace youtube_dl_api
                 process.StartInfo.Arguments = $"/C cd yt && yt-dlp.exe -x --audio-format mp3 --no-playlist --embed-metadata -o \"{timeString}%(title)s.%(ext)s\" \"" + url + "\"";
             else if (platform.Equals(OSPlatform.Linux))
                 process.StartInfo.Arguments = $"-c \"mkdir -p yt; cd yt; ./yt-dlp_linux  -x --audio-format mp3 --no-playlist --embed-metadata -o '{timeString}%(title)s.%(ext)s' '" + url + "'\"";
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardInput = true;
-            process.StartInfo.RedirectStandardError = true;
+            //process.StartInfo.RedirectStandardOutput = true;
+            //process.StartInfo.RedirectStandardInput = true;
+            //process.StartInfo.RedirectStandardError = true;
 
-            process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
-            process.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
+            //process.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
+            //process.OutputDataReceived += new DataReceivedEventHandler(MyProcOutputHandler);
             process.Start();
-            process.BeginOutputReadLine();
+            //process.BeginOutputReadLine();
             process.WaitForExit();
 
             if (process.ExitCode != 0)
             {
                 // Failed to get song do something
                 Console.WriteLine($"Process ended with exit code: {process.ExitCode}");
-                Console.Error.WriteLine(process.StandardOutput.ReadToEnd());
+                Console.Error.WriteLine("Process Output: " + process.StandardOutput.ReadToEnd());
 
                 FailedList.Add(newId);
                 ProcessingList.Remove(newId);
