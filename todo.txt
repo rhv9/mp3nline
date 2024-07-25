@@ -4,6 +4,8 @@ TODOs
 - Adds thumbnail to mp3 (shows up in music apps)
 - reduce docker image size to under 500 mb
 - MY YT API KEY IS ON GITHUB!!
+- Correct handling of things
+- ADD SOME DAMN CI CD MAN
 
 UI
 - Add copyright and stuff below
